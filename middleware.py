@@ -9,6 +9,7 @@ Descriptive recipe links and link previews for Tandoor.
   and private recipes never get one.
 - For logged-in users a page script keeps the slug in the address bar, so copied and shared URLs are descriptive.
 - Share links created with Tandoor's Share button get the slug appended too.
+- On share-link pages the guest app bar's logo links back to this instance instead of tandoor.dev.
 """
 import html
 import json
@@ -53,6 +54,15 @@ PAGE_SCRIPT = """<script>(() => {
   }
   addEventListener('popstate', () => setTimeout(addSlug, 0));
   addSlug();
+})();</script>"""
+
+# Logged-out share-link visitors get Tandoor's guest app bar, whose logo hard-links to https://tandoor.dev.
+# Point it at this instance instead; the observer catches the bar whenever Vue renders it.
+HOME_LINK_SCRIPT = """<script>(() => {
+  const home = %(home)s;
+  const fix = () => document.querySelectorAll('.v-app-bar a[href="https://tandoor.dev"]').forEach(a => { a.href = home; });
+  new MutationObserver(fix).observe(document.documentElement, {childList: true, subtree: true});
+  fix();
 })();</script>"""
 
 STUB_PAGE = """<!doctype html>
@@ -185,6 +195,8 @@ class LinkPreviewMiddleware:
         snippet = og_tags(request, recipe) if visible else ''
         if authenticated:
             snippet += PAGE_SCRIPT % {'base': reverse('index')}
+        elif share:
+            snippet += HOME_LINK_SCRIPT % {'home': json.dumps(_absolute(request, reverse('index')))}
         return _inject(response, snippet) if snippet else response
 
     def describe_share_link(self, response, pk):

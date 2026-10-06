@@ -9,6 +9,8 @@ descriptive and gives them rich previews in Messages, Slack, Discord and other a
 - **Link previews.** Preview fetchers are never logged in, so Tandoor normally sends them to the login page. With this
   plugin, a logged-out request that carries the recipe's exact title slug gets a small page with Open Graph tags
   (title, image, description) and a "Sign in to open in Tandoor" button. Logged-in pages and valid share links get the same tags.
+- **Home link for guests.** On share-link pages, Tandoor's guest header logo links to tandoor.dev. The plugin points
+  it at your own instance instead.
 
 ## Privacy
 
